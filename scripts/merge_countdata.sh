@@ -15,7 +15,8 @@ while getopts "c:h:o:" opt; do
 done
 shift $((OPTIND -1))
 
-if diff <(awk '{print $1}' ${in_cntrl}) <(awk '{print $1}' ${in_chx}) >& /dev/null;
+#if diff <(awk '{print $1}' ${in_cntrl}) <(awk '{print $1}' ${in_chx}) >& /dev/null;
+if diff <(cut -f1 ${in_cntrl}) <(cut -f1 ${in_chx}) >& /dev/null;
 then
   cut -f2- ${in_chx} > tmp.tsv
   paste <(cat ${in_cntrl}) <(cat tmp.tsv) > umcu_rnaseq_${out}s_counts.tsv

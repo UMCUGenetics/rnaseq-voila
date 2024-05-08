@@ -62,5 +62,5 @@ def add_phenotype_to_file(file_in, fc=0, pval_bound=0.01, zscore_bound=3):
 
 #file='/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/downloads/umcu_rnaseq_fib_untreated_res_outrider_genes_counts_copy.tsv'
 file='/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/outrider/umcu_rnaseq_fib_untreated_res_outrider_genes_counts_nopheno.tsv'
-add_phenotype_to_file(file, 0, 0.005, 2.5)
+add_phenotype_to_file(file, 0, 0.01, 2.5)
 #print(get_phenotype("ENSG00000255495"))
