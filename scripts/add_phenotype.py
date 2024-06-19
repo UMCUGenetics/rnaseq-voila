@@ -2,6 +2,14 @@
 
 import requests, sys
 import csv
+import argparse
+import gzip
+
+parser = argparse.ArgumentParser(description="Add phenotype to outrider output", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+parser.add_argument("file", help="provide outrider input file to add phenotype")
+parser.add_argument("-p", "--pval", type=float, help="Max p-value to search phenotype for")
+parser.add_argument("-z", "--zscore", type=float, help="Min z-score to search phenotype for")
+parser.add_argument("-m", "--meancorr", type=int, help="Min mean corrected to search phenotype for")
 
 def get_phenotype(gene):
     '''Returns ensemble phenotype'''
@@ -25,7 +33,7 @@ def get_phenotype(gene):
         elif not output_pheno: output_pheno = "nothing found"
     return output_pheno.replace(",","-").replace('\"',"")
 
-def add_pheno_to_row(fc,i,row,header_row,pval_bound,zscore_bound):
+def add_pheno_to_row(fc,i,row,header_row,pval_bound,zscore_bound,meancorr_bound):
     '''get phenotype
     add as new column to row
     and return as newrow'''
@@ -36,7 +44,7 @@ def add_pheno_to_row(fc,i,row,header_row,pval_bound,zscore_bound):
     elif fc: 
         output_pheno = get_phenotype(row[header_row.index('gene_name')])
     #for outrider result input
-    elif abs(float(row[header_row.index('zScore')])) > zscore_bound and float(row[header_row.index('pValue')]) < pval_bound:
+    elif abs(float(row[header_row.index('zScore')])) > zscore_bound and float(row[header_row.index('pValue')]) < pval_bound and float(row[header_row.index('meanCorrected')]) >= meancorr_bound:
         output_pheno = get_phenotype(row[header_row.index('gene')])
     
     if fc:
@@ -45,7 +53,7 @@ def add_pheno_to_row(fc,i,row,header_row,pval_bound,zscore_bound):
         row.append(output_pheno)
     return(row)
 
-def add_phenotype_to_file(file_in, fc=0, pval_bound=0.01, zscore_bound=3):
+def add_phenotype_to_file(file_in, fc=0, pval_bound=0.01, zscore_bound=3, meancorr_bound=0):
     '''Add phenotype as a column to imported file
     for rows that match boundaries
     and write in new file'''
@@ -57,10 +65,19 @@ def add_phenotype_to_file(file_in, fc=0, pval_bound=0.01, zscore_bound=3):
             reader = csvfile.readlines()
             header_row = reader[0][0:-1].split(",")
             for i,row in enumerate(reader):
-                newrow = add_pheno_to_row(fc,i,row[0:-1].split(","),header_row,pval_bound,zscore_bound)
+                newrow = add_pheno_to_row(fc,i,row[0:-1].split(","),header_row,pval_bound,zscore_bound,meancorr_bound)
                 writer.writerow(newrow)
+    file_out.close()
+    gzip.GzipFile(filename=file_out)
 
-#file='/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/downloads/umcu_rnaseq_fib_untreated_res_outrider_genes_counts_copy.tsv'
-file='/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/outrider/umcu_rnaseq_fib_untreated_res_outrider_genes_counts_nopheno.tsv'
-add_phenotype_to_file(file, 0, 0.01, 2.5)
-#print(get_phenotype("ENSG00000255495"))
+
+args = parser.parse_args()
+file = args.file
+pval = 0.01
+if args.pval is not None: pval = args.pval
+zscore = 2.5
+if args.zscore is not None: zscore = args.zscore
+meancorr = 0
+if args.meancorr is not None: meancorr = args.meancorr
+
+add_phenotype_to_file(file, 0, pval, zscore, meancorr)
