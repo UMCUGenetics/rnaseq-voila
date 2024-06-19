@@ -3,7 +3,7 @@
 import requests, sys
 import csv
 import argparse
-import gzip
+import gzip, shutil
 
 parser = argparse.ArgumentParser(description="Add phenotype to outrider output", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument("file", help="provide outrider input file to add phenotype")
@@ -67,17 +67,21 @@ def add_phenotype_to_file(file_in, fc=0, pval_bound=0.01, zscore_bound=3, meanco
             for i,row in enumerate(reader):
                 newrow = add_pheno_to_row(fc,i,row[0:-1].split(","),header_row,pval_bound,zscore_bound,meancorr_bound)
                 writer.writerow(newrow)
-    file_out.close()
-    gzip.GzipFile(filename=file_out)
+    with open(file_out, 'rb') as f_out:
+        with gzip.open(file_out+".gz", 'wb') as f_outgz:
+            shutil.copyfileobj(f_out, f_outgz)
+    print("done")
 
+def main():
+    args = parser.parse_args()
+    file = args.file
+    pval = 0.01
+    zscore = 2.5
+    meancorr = 0
+    if args.pval is not None: pval = args.pval
+    if args.zscore is not None: zscore = args.zscore
+    if args.meancorr is not None: meancorr = args.meancorr
+    
+    add_phenotype_to_file(file, 0, pval, zscore, meancorr)
 
-args = parser.parse_args()
-file = args.file
-pval = 0.01
-if args.pval is not None: pval = args.pval
-zscore = 2.5
-if args.zscore is not None: zscore = args.zscore
-meancorr = 0
-if args.meancorr is not None: meancorr = args.meancorr
-
-add_phenotype_to_file(file, 0, pval, zscore, meancorr)
+main()
