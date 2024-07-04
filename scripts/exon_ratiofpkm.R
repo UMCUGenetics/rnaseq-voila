@@ -116,7 +116,7 @@ print_ratiofpkm_exons <- function(keepexons, sample_ids, refexon, refgene, out_p
     colnames(ct_merge)[9] <- sample_id #paste(sample,".bam",sep="")
     ct_merge_expr <- ct_merge[ct_merge$Geneid %in% rownames(as.data.frame(keepexons)),]
     cat("# ratio fpkm file ",sample,"\n", file=paste0(out_path,sample,".cntrl.ratiofpkm.exon.txt"))
-    write_tsv(ct_merge_expr, paste0(out_path,sample,".cntrl.ratiofpkm.exon.txt"), append=TRUE)
+    write_tsv(ct_merge_expr, paste0(out_path,sample,".cntrl.ratiofpkm.exon.txt"), append=TRUE, col_names = T)
     print(paste0(sample," is added"))
   })
 }
@@ -124,11 +124,8 @@ print_ratiofpkm_exons <- function(keepexons, sample_ids, refexon, refgene, out_p
 main <- function(refexon, refgene, output_path){
   ref_data_exon <- get_input(refexon)
   all_counts <- merge_count_tables(ref_data_exon$count_tables)
-
   keepexons <- get_pc_exons(all_counts, refexon)
   print_ratiofpkm_exons(keepexons, ref_data_exon$sampleIDs, refexon, refgene, output_path)
 }
 
 main(args$refexon, args$refgene, args$output_path)
-
-
