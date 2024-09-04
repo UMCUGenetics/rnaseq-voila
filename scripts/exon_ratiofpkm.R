@@ -1,4 +1,5 @@
 #!/usr/bin/env Rscript
+# Code to generate exon ratio files (FPKM exon / FPKM gene)*100 for each provided sample/file
 
 # Import statements, alphabetic order of main package.
 suppressPackageStartupMessages(library("argparse"))
