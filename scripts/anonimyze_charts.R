@@ -1,10 +1,13 @@
+##Anonymize patient ids in OUTRIDER AND FRASER output files to generate top 20 lists per analysis
+##Code to generate plots of output data, regarding Final Master Project 
+
 library(readr)
 library(tibble)
 library(plyr)
 library(ggplot2)
 library(pals)
 
-##GENE
+##OUTRIDER output GENE LEVEL untreated samples
 urlg <- "/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/downloads/protein_coding/finalrefset_cntrl/umcu_rnaseq_fib_untreated_res_outrider_gene_counts_pheno.tsv"
 umc_res_g <- read_delim(urlg)
 
@@ -52,7 +55,7 @@ p3
 
 
 
-####EXON RATIO
+####OUTRIDER EXON RATIO
 urle <- "/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/downloads/protein_coding/finalrefset_ratiofpkm260624/umcu_rnaseq_fib_untreated_res_outrider_exons_counts_countsadded_pheno_added.tsv"
 umc_res_e <- read_delim(urle)
 
@@ -100,7 +103,8 @@ p3
 
 
 
-##filtering gene
+##filtering STEPS 1 - 4 for EXON RATIO results
+
 dim(umc_res_g)
 umc_res_g$genesample <- paste(umc_res_g$gene,umc_res_g$sampleID,sep="-")
 genes_keep <- umc_res_g[umc_res_g$normcounts>200,]
@@ -123,7 +127,7 @@ dim(exonskeep)
 exonskeep <- umc_res_e[!umc_res_e$genesample %in% duplicates & umc_res_e$genesample %in% genes_keep$genesample,]
 dim(exonskeep)
 
-## Plot step 3
+## Volcano Plot step 3
 p <- ggplot(data=exonskeep, aes(x=zScore, y=-log10(pValue), col=Outlier)) + geom_point() + theme_minimal()
 #p
 # Add lines 
@@ -178,7 +182,7 @@ write_csv(top100[c(1:100),c(1:23)], paste0("/Users/lbrussel/rnaseq-emc/notebook/
 
 
 
-## gene CHX
+## OUTRIDER output gene level - CHX treated samples
 
 urlgchx <- "/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/downloads/protein_coding/finalrefset_chx/umcu_rnaseq_fib_chx_res_outrider_gene_counts.tsv"
 umc_res_gchx <- read_delim(urlgchx)
@@ -208,8 +212,7 @@ write_csv(genes_anonym[c(1:22,24)], paste0("/Users/lbrussel/rnaseq-emc/notebook/
 
 
 
-## Exon
-
+## OUTRIDER output exon level - untreated samples
 
 urlex <- "/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/outrider/umcu_rnaseq_fib_untreated_res_outrider_exons_counts_finalexon.tsv"
 umc_res_ex <- read_delim(urlex)
@@ -238,7 +241,8 @@ top100 <- genes_anonym[order(genes_anonym$pValue),]
 write_csv(top100[c(1:100),c(1:23)], paste0("/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/outrider/top100/","umcu_rnaseq_fib_untreated_res_outrider_exons_counts_anonymous_top100.csv"), append=FALSE, col_names = TRUE)
 
 
-#FRASER
+
+#OUTPUT data FRASER untreated samples - anonimize and generate top 100 list and Vulcano plot
 urlf <- "/Users/lbrussel/rnaseq-emc/notebook/rnaseq-voila-main/fraser/300624/fraser_result_sample2.csv"
 umc_res_f <- read_delim(urlf)
 
