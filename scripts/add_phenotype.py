@@ -93,6 +93,7 @@ def add_phenotype_to_file(file_in, type_res=0, pval_bound=0.01, zscore_bound=3, 
     print("done")
 
 def main():
+    '''Set and get arguments to add phenotype to results within corresponding boundaries'''
     args = parser.parse_args()
     file = args.file
     type_res = 0 
