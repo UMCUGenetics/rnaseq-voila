@@ -21,6 +21,7 @@ args <- parser$parse_args()
 
 
 read_input_files <- function(input){
+  ##read input files 
   sampleIDs <- c()
   count_tables <- lapply(input, function(f) {
     input_ext <- tools::file_ext(f)
@@ -67,12 +68,13 @@ merge_count_tables <- function(lst_ref){
 
 
 get_pc_exons <- function(all_counts, refexon){
+  ##GET ALL featurecounts exon-level count data in a matrix and keep only exons within exon-level filtering boundaries
   all_counts_matrix <- as.matrix(all_counts)[,-1]
   mode(all_counts_matrix) <- "integer"
   rownames(all_counts_matrix) <- all_counts$rownames
   ods <- OutriderDataSet(countData=all_counts_matrix)
   
-  ##FOR EXON LEVEL
+  ##STANDARD OUTRIDER FILTERING FOR EXON LEVEL
   ct <- read_delim(paste0(refexon,sub(".bam", "", colnames(all_counts)[2]),".cntrl.exon.txt"), show_col_types=FALSE, skip=1)
   print("identical exon ids:")
   print(identical(ct$Geneid,rownames(assays(ods)$counts)))
@@ -81,6 +83,7 @@ get_pc_exons <- function(all_counts, refexon){
   perc95e <- apply(countsFPKM, 1, function(x) quantile(x,probs=0.95))
   keep <- perc95e>1
   #mcols(ods)$basepairs <- ct$Length
+  ##KEEP only exons within filtering boundaries
   keepexons <- keep[keep==TRUE]
   #length(keepexons)
   return(keepexons)
@@ -88,6 +91,7 @@ get_pc_exons <- function(all_counts, refexon){
 
 
 print_ratiofpkm_exons <- function(keepexons, sample_ids, refexon, refgene, out_path){
+  ## calculate ratio FPKM exon / FPKM gene per sample file, based on exons to keep 
   dir.create(file.path(out_path))
   lapply(sample_ids, function(sample_id){
     sample <- sub(".bam", "", sample_id)
@@ -122,6 +126,7 @@ print_ratiofpkm_exons <- function(keepexons, sample_ids, refexon, refgene, out_p
 }
 
 main <- function(refexon, refgene, output_path){
+  ##read exon counts input files - apply standard exon level OUTRIDER filtering - calculate EXON ratio output per sample and print exon ratio file
   ref_data_exon <- get_input(refexon)
   all_counts <- merge_count_tables(ref_data_exon$count_tables)
   keepexons <- get_pc_exons(all_counts, refexon)
